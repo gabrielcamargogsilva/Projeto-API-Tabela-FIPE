@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>veiculos.com</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="flex flex-col min-h-screen bg-gray-100 text-gray-800">
+    <header>
+        <nav class="bg-blue-600 shadow-md p-4">
+            <div class="container mx-auto flex justify-between items-center px-4">
+                <a class="text-white text-2xl font-bold" href="#">Veiculos.com 🚚</a>
+                <ul class="flex space-x-6">
+                    <li><a class="text-white hover:text-yellow-300" href="#">Home</a></li>
+                    <li><a class="text-white hover:text-yellow-300" href="#">Sobre nós</a></li>
+                    <li><a class="text-white hover:text-yellow-300" href="#">Contato</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="flex-grow flex flex-col items-center p-6">
+
+        <!-- Seção de introdução com fundo branco e texto escuro -->
+        <section class="bg-white text-gray-900 text-center py-8 border-b border-gray-300 shadow-md w-full">
+            <h1 class="text-3xl font-bold mb-2">Descubra o preço do seu carro de acordo com a tabela FIPE</h1>
+            <p class="text-lg font-light mb-4">Encontre o valor atual do seu veículo de forma rápida e fácil.</p>
+        </section>
+
+        <!-- Formulário -->
+        <div class="bg-white shadow-lg rounded-lg p-6 max-w-lg w-full mt-8">
+            <h2 class="text-center text-xl font-bold text-blue-600 mb-4">Descubra o preço do carro desejado!</h2>
+            <form action="/" method="post" class="space-y-4">
+                <div>
+                    <label for="marca" class="block font-bold">Escolha a marca</label>
+                    <select id="marca" name="marca" required
+                        class="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-blue-500">
+                        <option value="">Selecione uma marca</option>
+                        {% for marca in marcas %}
+                        <option value="{{ marca.codigo }}">{{ marca.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="modelo" class="block font-bold">Escolha o modelo</label>
+                    <select id="modelo" name="modelo" required
+                        class="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-blue-500">
+                        <option value="">Selecione um modelo</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="ano" class="block font-bold">Escolha o ano</label>
+                    <select id="ano" name="ano" required
+                        class="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-blue-500">
+                        <option value="">Selecione um ano</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600">Descobrir
+                    preço do veículo</button>
+            </form>
+
+            {% if preco_veiculo %}
+            <div class="mt-5 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-800 rounded-lg shadow-md text-center">
+                <p class="text-lg font-semibold">{{ veiculo }}</p>
+                <p class="text-xl font-bold text-blue-700 mt-1"> {{ preco_veiculo }}</p>
+            </div>
+            {% endif %}
+
+            {% if erro %}
+            <div class="mt-5 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 rounded-lg shadow-md">
+                <p class="text-lg font-semibold">⚠️ {{ erro }}</p>
+            </div>
+            {% endif %}
+        </div>
+        
+    </main>
+
+    <footer class="bg-gray-900 text-white text-center p-4 mt-6">
+        <p>&#169; Desenvolvido por Gabriel Camargo - <a href="https://deividfortuna.github.io/fipe/"
+                class="text-yellow-300 hover:underline">API utilizada</a></p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const marcaSelect = document.getElementById("marca");
+            const modeloSelect = document.getElementById("modelo");
+            const anoSelect = document.getElementById("ano");
+
+            marcaSelect.addEventListener("change", function () {
+                modeloSelect.innerHTML = "<option value=''>Selecione um modelo</option>";
+                anoSelect.innerHTML = "<option value=''>Selecione um ano</option>";
+
+                if (this.value) {
+                    fetch(`/modelos/${this.value}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            data.forEach(modelo => {
+                                let option = new Option(modelo.nome, modelo.codigo);
+                                modeloSelect.appendChild(option);
+                            });
+                        })
+                        .catch(() => alert("Erro ao carregar modelos."));
+                }
+            });
+
+            modeloSelect.addEventListener("change", function () {
+                anoSelect.innerHTML = "<option value=''>Selecione um ano</option>";
+
+                if (this.value) {
+                    fetch(`/anos/${marcaSelect.value}/${this.value}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            data.forEach(ano => {
+                                let option = new Option(ano.nome, ano.codigo);
+                                anoSelect.appendChild(option);
+                            });
+                        })
+                        .catch(() => alert("Erro ao carregar anos."));
+                }
+            });
+        });
+    </script>
+</body>
+
+
+
+
+</html>
